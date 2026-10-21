@@ -517,6 +517,8 @@ let curChoices=[],curCorrectIdx=-1,viewingGenreId=null,lastResult=null;
 
 /* ---------- ユーティリティ ---------- */
 function escapeHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+/* 選択肢表示用：読みがな等の（カッコ）を除去（全角・半角）。データ本体は変更しない。 */
+function stripReading(s){return String(s).replace(/[（(][^（()）]*[）)]/g,'').replace(/\s+/g,' ').trim();}
 function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
 function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');document.getElementById('quit-btn').style.display=(id==='screen-quiz')?'block':'none';window.scrollTo(0,0);}
 function poolOf(gid){return gid==='omakase'?GENRES.filter(g=>g.id!=='omakase').flatMap(g=>DB[g.id]):DB[gid];}
@@ -583,8 +585,10 @@ function showQuestion(){
   curChoices=shuffle(pairs);
   curCorrectIdx=curChoices.findIndex(p=>p.correct);
   const lab=['一','二','三','四'];
+  // 出題時は読みがな等の（カッコ）を隠す（正解だけカッコ付きで分かってしまうのを防ぐ）。
+  // 読みは正解発表・解説・学習モードで表示される。
   document.getElementById('choices').innerHTML=curChoices.map((p,i)=>
-    `<button class="choice" onclick="answer(${i})"><span class="lab">${lab[i]}</span>${escapeHtml(p.text)}</button>`
+    `<button class="choice" onclick="answer(${i})"><span class="lab">${lab[i]}</span>${escapeHtml(stripReading(p.text))}</button>`
   ).join('');
 }
 
